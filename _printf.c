@@ -1,50 +1,47 @@
 #include "main.h"
 /**
- * _printf - printf function
- * @format: array of strings to print
- * @...: variable arguments
- * Return: -1 on error
+ * _printf - is a function that selects the correct function to print.
+ * @format: identifier to look for.
+ * Return: the length of the string.
  */
-int _printf(const char *format, ...)
+int _printf(const char * const format, ...)
 {
-	int num_char, str_len = 0;
+	convert p[] = {
+		{"%s", print_s}, {"%c", print_c},
+		{"%%", print_37},
+		{"%i", print_i}, {"%d", print_d}, {"%r", print_revs},
+		{"%R", print_rot13}, {"%b", print_bin},
+		{"%u", print_unsigned},
+		{"%o", print_oct}, {"%x", print_hex}, {"%X", print_HEX},
+		{"%S", print_exc_string}, {"%p", print_pointer}
+	};
+
 	va_list args;
+	int i = 0, j, length = 0;
 
-	if (format == NULL)
-		return (-1);
 	va_start(args, format);
-	while (*format)
+	if (format == NULL || (format[0] == '%' && format[1] == '\0'))
+		return (-1);
+
+Here:
+	while (format[i] != '\0')
 	{
-		if (*format != '%')
+		j = 13;
+		while (j >= 0)
 		{
-			write(1, format, 1);
-			num_char++;
-		} else
-		{
-			format++;
-			if (*format == '\0')
-				break;
-			if (*format == '%')
-				write(1, format, 1);
-				num_char++;
-			} else if (*format == 'c')
+			if (p[j].ph[0] == format[i] && p[j].ph[1] == format[i + 1])
 			{
-				char c = va_arg(args, int);
-
-				write(1, &c, 1);
-				numchar++;
-			} else if (*format == 's')
-			{
-				char *str = va_arg(args, char*);
-
-				while (str[str_len] != '\0')
-					str_len++;
-				write(1, str, str_len);
-				num_char += str_len;
+				length += p[j].function(args);
+				i = i + 2;
+				goto Here;
 			}
+			j--;
 		}
-		format++;
+		_putchar(format[i]);
+		length++;
+		i++;
 	}
 	va_end(args);
-	return (num_char);
+	return (length);
 }
+
